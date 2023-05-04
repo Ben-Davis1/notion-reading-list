@@ -56,14 +56,21 @@ const createPage = async(title, link) => {
 
   new Promise(r => setTimeout(r, 3000))
 };
+ res.setHeader('Content-Type', 'text/html');
 
+res.write(`hello ben`)
   let feed = await parser.parseURL("https://api.daily.dev/rss/b/3195204d-2ffa-431b-98b0-11ccb1b8f3cc");
   
   const bookmarks = feed.items
 
-  Promise.map(bookmarks, bookmark => createPage(bookmark.title, bookmark.link.split("?")[0]), { concurrency: 1 })
+  res.write(`<div>im adding ${bookmarks.length}</div>`)
+  res.write(`<div>will take ${bookmarks.length * 3} seconds</div>`)
 
-  res.send('Hello World!')
+  await Promise.map(bookmarks, bookmark => createPage(bookmark.title, bookmark.link.split("?")[0]), { concurrency: 1 })
+
+  res.write('<div>first bookmark: ' + bookmarks[0].title + "</div>")
+  res.write('<div>Last bookmark: ' + bookmarks[bookmarks.length - 1].title + "</div>")
+  res.end()
 })
 
 app.listen(port, () => {
